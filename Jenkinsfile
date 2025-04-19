@@ -2,7 +2,7 @@ pipeline {
     agent any  // Run on any available agent
 
     environment {
-        // Define any environment variables if needed
+       DOCKER_IMAGE = "quiz-backend:latest" // Define any environment variables if needed
     }
 
     stages {
