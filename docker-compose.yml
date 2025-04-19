@@ -1,0 +1,21 @@
+version: '3'
+services:
+  backend:
+    build:
+      context: ./backend/quiz-backend
+    ports:
+      - "8081:8081"
+    networks:
+      - quiz-net
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "8085:80"
+    networks:
+      - quiz-net
+
+networks:
+  quiz-net:
+    driver: bridge

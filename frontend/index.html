@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Quiz App</title>
+    <meta charset="UTF-8" />
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f2f2f2; }
+        h1 { color: #333; }
+        .question-block { margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 0 5px #ccc; }
+        .option { margin-left: 20px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+        #score { margin-top: 20px; font-weight: bold; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+<h1>Simple Quiz</h1>
+<div id="quiz"></div>
+<button onclick="submitQuiz()">Submit</button>
+
+<div id="score"></div>
+
+<script>
+    let questions = [];
+
+    // Fetch quiz questions
+    fetch("http://localhost:8081/questions")
+        .then(res => res.json())
+        .then(data => {
+            questions = data;
+            displayQuestions();
+        })
+        .catch(err => console.error("Error loading questions:", err));
+
+    function displayQuestions() {
+        const quizDiv = document.getElementById("quiz");
+        quizDiv.innerHTML = "";
+
+        questions.forEach((q, index) => {
+            const questionDiv = document.createElement("div");
+            questionDiv.classList.add("question-block");
+
+            questionDiv.innerHTML = `<p><strong>Q${index + 1}:</strong> ${q.question}</p>`;
+
+            q.options.forEach(option => {
+                const id = `q${index}_${option}`;
+                questionDiv.innerHTML += `
+                    <div class="option">
+                        <input type="radio" id="${id}" name="question${index}" value="${option}">
+                        <label for="${id}">${option}</label>
+                    </div>
+                `;
+            });
+
+            quizDiv.appendChild(questionDiv);
+        });
+    }
+
+    function submitQuiz() {
+        const answers = [];
+
+        for (let i = 0; i < questions.length; i++) {
+            const selected = document.querySelector(`input[name="question${i}"]:checked`);
+            answers.push(selected ? selected.value : "");
+        }
+
+        fetch("http://localhost:8081/submit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(answers)
+        })
+        .then(res => res.json())
+        .then(result => {
+            document.getElementById("score").innerText = `You scored ${result.score} out of ${result.total}`;
+        })
+        .catch(err => {
+            console.error("Submission error:", err);
+            document.getElementById("score").innerText = "Error submitting quiz.";
+        });
+    }
+</script>
+
+</body>
+</html>
